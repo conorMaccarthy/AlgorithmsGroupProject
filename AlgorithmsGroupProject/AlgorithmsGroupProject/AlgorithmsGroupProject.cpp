@@ -8,12 +8,16 @@ struct Node {
     int index;
     bool isChargingStation;
     string name;
+
+    //For Dijkstra's Algorithm
+    int shortestDistance;
+    Node* previousNode;
 };
 
 struct Edge {
     int weight;
-    Node start;
-    Node end;
+    Node* start;
+    Node* end;
 };
 
 class Graph {
@@ -21,10 +25,12 @@ private:
     int nodeCount;
     vector<Node> nodes;
     vector<vector<Edge>> edges;
+    Node* startNode;
 
 public:
     Graph(int nodeCountInit) : nodeCount(nodeCountInit) { 
         edges.resize(nodeCountInit); 
+        startNode = findNode("A");
     }
 
     void addNode(string name, int index) {
@@ -32,21 +38,33 @@ public:
         node.name = name;
         node.index = index;
 
+        node.shortestDistance = 1000;
+
         if (node.name == "H" || node.name == "K" || node.name == "Q" || node.name == "T") node.isChargingStation = true;
         else node.isChargingStation = false;
         
         nodes.push_back(node);
     }
 
-    Node findNode(string name) {
+    Node* findNode(string name) {
+        Node* temp;
         for (int i = 0; i < nodes.size(); i++) {
-            if (nodes.at(i).name == name) return nodes.at(i);
+            if (nodes.at(i).name == name) {
+                temp = &nodes.at(i);
+                return &(*temp);
+            }
         }
+        return nullptr;
     }
-    Node findNode(int index) {
+    Node* findNode(int index) {
+        Node* temp;
         for (int i = 0; i < nodes.size(); i++) {
-            if (nodes.at(i).index == index) return nodes.at(i);
+            if (nodes.at(i).index == index) {
+                temp = &nodes.at(i);
+                return &(*temp);
+            }
         }
+        return nullptr;
     }
 
     void addEdge(string startNode, string endNode, int weight) {
@@ -55,15 +73,26 @@ public:
         edge.start = findNode(startNode);
         edge.end = findNode(endNode);
 
-        edges.at(findNode(startNode).index).push_back(edge);
-        edges.at(findNode(endNode).index).push_back(edge);
+        edges.at(findNode(startNode)->index).push_back(edge);
+        edges.at(findNode(endNode)->index).push_back(edge);
     }
 
     void printNode(string name) {
-        cout << "Node " << findNode(name).name << " is connected to: " << endl;
-        for (int i = 0; i < edges.at(findNode(name).index).size(); i++) {
-            cout << "\t" << edges.at(findNode(name).index).at(i).end.name << " with a weight of " << edges.at(findNode(name).index).at(i).weight << endl;
+        cout << "Node " << findNode(name)->name << " is connected to: " << endl;
+        for (int i = 0; i < edges.at(findNode(name)->index).size(); i++) {
+            if (edges.at(findNode(name)->index).at(i).end->name == name) {
+                cout << "\t" << edges.at(findNode(name)->index).at(i).start->name << " with a weight of " << edges.at(findNode(name)->index).at(i).weight << endl;
+            }
+            else {
+                cout << "\t" << edges.at(findNode(name)->index).at(i).end->name << " with a weight of " << edges.at(findNode(name)->index).at(i).weight << endl;
+            }
         }
+    }
+
+    void dijkstra(string startName, string targetName) {
+        
+
+        cout << "Distance of " << nodes.at(findNode(targetName)->index).name << " from " << nodes.at(findNode(startName)->index).name << ": " << nodes.at(findNode(targetName)->index).shortestDistance << endl;
     }
 };
 
@@ -139,9 +168,12 @@ int main()
 
     createEdges(graph, fileData);
 
-    for (int i = 0; i < 23; i++) {
-        graph.printNode(graph.findNode(i).name);
-    }
+    graph.dijkstra("A", "G");
+
+    //Print all nodes with all connections
+    /*for (int i = 0; i < 23; i++) {
+        graph.printNode(graph.findNode(i)->name);
+    }*/
     
     return 0;
 }
