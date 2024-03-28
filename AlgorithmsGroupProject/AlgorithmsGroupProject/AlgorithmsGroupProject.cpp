@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <string>
 using namespace std;
 
 struct Node {
@@ -42,8 +43,13 @@ public:
             if (nodes.at(i).name == name) return nodes.at(i);
         }
     }
+    Node findNode(int index) {
+        for (int i = 0; i < nodes.size(); i++) {
+            if (nodes.at(i).index == index) return nodes.at(i);
+        }
+    }
 
-    void addEdge(const string& startNode, const string& endNode, int weight) {
+    void addEdge(string startNode, string endNode, int weight) {
         Edge edge;
         edge.weight = weight;
         edge.start = findNode(startNode);
@@ -61,24 +67,81 @@ public:
     }
 };
 
-/*vector<Node> readFile() {
+vector<string> readFile() {
+    vector<string> stringVector;
+    string line;
 
-}*/
+    ifstream myFile("GraphData.txt");
+    if (myFile.is_open()) {
+        while (getline(myFile, line)) {
+            stringVector.push_back(line);
+        }
+        myFile.close();
+    }
+
+    return stringVector;
+}
+
+vector<string> splitString(string & input) {
+    vector<string> substringVector;
+    string newWord = "";
+
+    for (int i = 0; i < input.size(); i++) {
+        if (input[i] != ',') {
+            newWord = newWord + input[i];
+        }
+        else {
+            if (newWord.size() != 0) {
+                substringVector.push_back(newWord);
+                newWord = "";
+            }
+        }
+    }
+
+    return substringVector;
+}
+
+void createNodes(Graph & graph, vector<string> & stringVector) {
+    for (int i = 0; i < stringVector.size(); i++) {
+        graph.addNode(stringVector.at(i).substr(0, stringVector.at(i).find(',')), i);
+    }
+}
+
+void createEdges(Graph& graph, vector<string>& stringVector) {
+    vector<string> line;
+    
+    string startNode = "";
+    string endNode = "";
+    int newWeight = 0;
+
+    for (int i = 0; i < stringVector.size(); i++) {
+        line = splitString(stringVector.at(i));
+        int j = 1;
+
+        while (j < line.size()) {
+            startNode = line.at(0);
+            endNode = line.at(j);
+            newWeight = stoi(line.at(j + 1));
+
+            graph.addEdge(startNode, endNode, newWeight);
+            j = j + 2;
+        }
+    }
+}
 
 int main()
 {
-    Graph graph(5);
+    Graph graph(23);
 
-    graph.addNode("A", 0);
-    graph.addNode("B", 1);
-    graph.addNode("C", 2);
-    graph.addNode("D", 3);
-    graph.addNode("E", 4);
+    vector<string> fileData = readFile();
 
-    graph.addEdge("A", "C", 7);
-    graph.addEdge("A", "D", 5);
+    createNodes(graph, fileData);
 
-    graph.printNode("A");
+    createEdges(graph, fileData);
+
+    for (int i = 0; i < 23; i++) {
+        graph.printNode(graph.findNode(i).name);
+    }
     
     return 0;
 }
