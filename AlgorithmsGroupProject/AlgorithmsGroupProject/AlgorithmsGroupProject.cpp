@@ -92,14 +92,15 @@ public:
         }
     }
 
-    void dijkstra(string startName, string targetName) {
+    int dijkstra(string startName, string targetName) {
         Node* currentNode = &nodes.at(findNode(startName)->index);
         currentNode->shortestDistance = 0;
         Node* nextNode;
-        Node* nodeToVisit;
+        Node* nodeToVisit = nullptr;
+
+        vector<Node*> unvisitedNodes;
 
         for (int i = 0; i < nodes.size(); i++) {
-            nodeToVisit = nullptr;
             for (int j = 0; j < edges.at(currentNode->index).size(); j++) {
                 if (edges.at(currentNode->index).at(j).end->name == currentNode->name) nextNode = edges.at(currentNode->index).at(j).start;
                 else nextNode = edges.at(currentNode->index).at(j).end;
@@ -108,19 +109,22 @@ public:
                     nextNode->shortestDistance = currentNode->shortestDistance + edges.at(currentNode->index).at(j).weight;
                 }
 
-                if (nodeToVisit == nullptr && !nextNode->visited) {
-                    nodeToVisit = nextNode;
-                }
-                else if (nodeToVisit != nullptr && !nextNode->visited && nextNode->shortestDistance < nodeToVisit->shortestDistance) {
-                    nodeToVisit = nextNode;
+                if (!nextNode->visited) unvisitedNodes.push_back(nextNode);
+
+                if (unvisitedNodes.size() > 0) nodeToVisit = unvisitedNodes.at(0);
+
+                for (int ii = 0; ii < unvisitedNodes.size(); ii++) {
+                    if (unvisitedNodes.at(ii)->shortestDistance < nodeToVisit->shortestDistance) nodeToVisit = unvisitedNodes.at(ii);
+                    if (unvisitedNodes.at(ii)->name == currentNode->name) unvisitedNodes.erase(unvisitedNodes.begin() + ii);
                 }
             }
-            if (nodeToVisit == nullptr) break;
             currentNode->visited = true;
+            nodeToVisit->previousNode = currentNode;
             currentNode = nodeToVisit;
         }
 
         cout << "Distance of " << nodes.at(findNode(targetName)->index).name << " from " << nodes.at(findNode(startName)->index).name << ": " << nodes.at(findNode(targetName)->index).shortestDistance << endl;
+        return nodes.at(findNode(targetName)->index).shortestDistance;
     }
 };
 
@@ -196,7 +200,7 @@ int main()
 
     createEdges(graph, fileData);
 
-    graph.dijkstra("A", "B");
+    graph.dijkstra("C", "T");
 
     //Print all nodes with all connections
     /*for (int i = 0; i < 23; i++) {
