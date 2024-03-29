@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <algorithm>
 using namespace std;
 
 struct Node {
@@ -92,7 +93,7 @@ public:
         }
     }
 
-    int dijkstra(string startName, string targetName) {
+    void dijkstra(string startName) {
         Node* currentNode = &nodes.at(findNode(startName)->index);
         currentNode->shortestDistance = 0;
         Node* nextNode;
@@ -107,6 +108,7 @@ public:
 
                 if (currentNode->shortestDistance + edges.at(currentNode->index).at(j).weight < nextNode->shortestDistance) {
                     nextNode->shortestDistance = currentNode->shortestDistance + edges.at(currentNode->index).at(j).weight;
+                    nextNode->previousNode = currentNode;
                 }
 
                 if (!nextNode->visited) unvisitedNodes.push_back(nextNode);
@@ -119,12 +121,65 @@ public:
                 }
             }
             currentNode->visited = true;
-            nodeToVisit->previousNode = currentNode;
             currentNode = nodeToVisit;
         }
 
-        cout << "Distance of " << nodes.at(findNode(targetName)->index).name << " from " << nodes.at(findNode(startName)->index).name << ": " << nodes.at(findNode(targetName)->index).shortestDistance << endl;
-        return nodes.at(findNode(targetName)->index).shortestDistance;
+
+        int shortestDist = nodes.at(findNode("H")->index).shortestDistance;
+        char closestStation = 'H';
+        cout << "Distance of Node " << nodes.at(findNode(startName)->index).name << " From Charging Station at Node H: " << nodes.at(findNode("H")->index).shortestDistance << endl;
+        cout << "Route From Station: ";
+        Node* nodeToPrint = &nodes.at(findNode("H")->index);
+        while (nodeToPrint->name != startName) {
+            cout << nodeToPrint->name << ", ";
+            nodeToPrint = nodeToPrint->previousNode;
+        }
+        cout << startName << "\n" << endl;
+
+
+        if (nodes.at(findNode("K")->index).shortestDistance < shortestDist) {
+            shortestDist = nodes.at(findNode("K")->index).shortestDistance;
+            closestStation = 'K';
+        }
+        cout << "Distance of Node " << nodes.at(findNode(startName)->index).name << " From Charging Station at Node K: " << nodes.at(findNode("K")->index).shortestDistance << endl;
+        cout << "Route From Station: ";
+        nodeToPrint = &nodes.at(findNode("K")->index);
+        while (nodeToPrint->name != startName) {
+            cout << nodeToPrint->name << ", ";
+            nodeToPrint = nodeToPrint->previousNode;
+        }
+        cout << startName << "\n" << endl;
+
+
+        if (nodes.at(findNode("Q")->index).shortestDistance < shortestDist) {
+            shortestDist = nodes.at(findNode("Q")->index).shortestDistance;
+            closestStation = 'Q';
+        }
+        cout << "Distance of Node " << nodes.at(findNode(startName)->index).name << " From Charging Station at Node Q: " << nodes.at(findNode("Q")->index).shortestDistance << endl;
+        cout << "Route From Station: ";
+        nodeToPrint = &nodes.at(findNode("Q")->index);
+        while (nodeToPrint->name != startName) {
+            cout << nodeToPrint->name << ", ";
+            nodeToPrint = nodeToPrint->previousNode;
+        }
+        cout << startName << "\n" << endl;
+
+
+        if (nodes.at(findNode("T")->index).shortestDistance < shortestDist) {
+            shortestDist = nodes.at(findNode("T")->index).shortestDistance;
+            closestStation = 'T';
+        }
+        cout << "Distance of Node " << nodes.at(findNode(startName)->index).name << " From Charging Station at Node T: " << nodes.at(findNode("T")->index).shortestDistance << endl;
+        cout << "Route From Station: ";
+        nodeToPrint = &nodes.at(findNode("T")->index);
+        while (nodeToPrint->name != startName) {
+            cout << nodeToPrint->name << ", ";
+            nodeToPrint = nodeToPrint->previousNode;
+        }
+        cout << startName << "\n" << endl;
+
+
+        cout << "The Closest Station is Station " << closestStation << ", so You Should Follow the Route From Station " << closestStation << "." << endl;
     }
 };
 
@@ -158,7 +213,6 @@ vector<string> splitString(string & input) {
             }
         }
     }
-
     return substringVector;
 }
 
@@ -200,12 +254,12 @@ int main()
 
     createEdges(graph, fileData);
 
-    graph.dijkstra("C", "T");
+    cout << "Which Node Would You Like to Start At? (Type a Character From A-W) ";
+    string input;
+    cin >> input;
+    transform(input.begin(), input.end(), input.begin(), ::toupper);
 
-    //Print all nodes with all connections
-    /*for (int i = 0; i < 23; i++) {
-        graph.printNode(graph.findNode(i)->name);
-    }*/
-    
+    graph.dijkstra(input);
+
     return 0;
 }
